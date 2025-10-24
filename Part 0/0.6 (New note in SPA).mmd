@@ -1,0 +1,14 @@
+sequenceDiagram
+    participant browser
+    participant server
+
+    Note right of browser: User writes a new note and submits it
+
+    Note right of browser: JavaScript intercepts the event, updates the DOM locally, and sends the note asynchronously
+
+    browser->>server: POST /exampleapp/new_note_spa
+    activate server
+    server-->>browser: {"message": "note created"}
+    deactivate server
+
+    Note right of browser: Browser receives confirmation - no page reload occurs
