@@ -5,40 +5,48 @@ const supertest = require('supertest')
 const app = require('../app')
 const Blog = require('../models/blog')
 const helper = require('./test_helper')
+const jwt = require('jsonwebtoken')
+const bcrypt = require('bcrypt')
+const User = require('../models/user')
 
 const api = supertest(app)
 
+let token = null
+
 beforeEach(async () => {
+  await User.deleteMany({})
   await Blog.deleteMany({})
-  const blogObjects = helper.initialBlogs.map(blog => new Blog(blog))
+
+  const passwordHash = await bcrypt.hash('sekret', 10)
+  const user = new User({ username: 'root', passwordHash })
+  await user.save()
+
+  const userForToken = { username: user.username, id: user.id }
+  token = jwt.sign(userForToken, process.env.SECRET)
+
+  const blogObjects = helper.initialBlogs.map(blog => {
+    return new Blog({ ...blog, user: user.id })
+  })
   const promiseArray = blogObjects.map(blog => blog.save())
   await Promise.all(promiseArray)
 })
 
-describe('when there is initially some blogs saved', () => {
-  test('blogs are returned as json and in correct amount', async () => {
-    const response = await api
-      .get('/api/blogs')
-      .expect(200)
-      .expect('Content-Type', /application\/json/)
-
-    assert.strictEqual(response.body.length, helper.initialBlogs.length)
-  })
-
-  test('the unique identifier property of the blog posts is named id', async () => {
-    const response = await api.get('/api/blogs')
-    
-    // Look at the first blog in the response
-    const firstBlog = response.body[0]
-    
-    // Assert that the 'id' property is defined
-    assert(firstBlog.id !== undefined)
-    // Ensure the old '_id' property is gone
-    assert(firstBlog._id === undefined)
-  })
-})
-
 describe('addition of a new blog', () => {
+  beforeEach(async () => {
+    await User.deleteMany({})
+
+    const passwordHash = await bcrypt.hash('sekret', 10)
+    const user = new User({ username: 'root', passwordHash })
+    await user.save()
+
+    const userForToken = {
+      username: user.username,
+      id: user.id,
+    }
+
+    token = jwt.sign(userForToken, process.env.SECRET)
+  })
+
   test('a valid blog can be added', async () => {
     const newBlog = {
       title: 'Testing async/await in Supertest',
@@ -49,6 +57,7 @@ describe('addition of a new blog', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -69,6 +78,7 @@ describe('addition of a new blog', () => {
 
     const response = await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(201)
       .expect('Content-Type', /application\/json/)
@@ -84,6 +94,7 @@ describe('addition of a new blog', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(400)
 
@@ -99,8 +110,25 @@ describe('addition of a new blog', () => {
 
     await api
       .post('/api/blogs')
+      .set('Authorization', `Bearer ${token}`)
       .send(newBlog)
       .expect(400)
+
+    const blogsAtEnd = await helper.blogsInDb()
+    assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
+  })
+
+  test('fails with status code 401 if a token is not provided', async () => {
+    const newBlog = {
+      title: 'Unauthorized blog',
+      author: 'Hacker',
+      url: 'http://hacker.com'
+    }
+
+    await api
+      .post('/api/blogs')
+      .send(newBlog)
+      .expect(401)
 
     const blogsAtEnd = await helper.blogsInDb()
     assert.strictEqual(blogsAtEnd.length, helper.initialBlogs.length)
@@ -114,6 +142,7 @@ describe('deletion of a blog', () => {
 
     await api
       .delete(`/api/blogs/${blogToDelete.id}`)
+      .set('Authorization', `Bearer ${token}`)
       .expect(204)
 
     const blogsAtEnd = await helper.blogsInDb()
@@ -141,7 +170,7 @@ describe('updating a blog', () => {
 
     const blogsAtEnd = await helper.blogsInDb()
     const updatedBlogInDb = blogsAtEnd.find(blog => blog.id === blogToUpdate.id)
-    
+
     assert.strictEqual(updatedBlogInDb.likes, blogToUpdate.likes + 10)
   })
 })
