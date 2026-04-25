@@ -1,1 +1,1 @@
-# I’m grateful to the University of Helsinki for providing this excellent Full Stack open course
+# Grateful for the University of Helsinki’s Full Stack Open MOOC
