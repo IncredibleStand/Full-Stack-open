@@ -118,6 +118,7 @@ describe('<AnecdoteList />', () => {
     render(<TestWrapper />)
     const user = userEvent.setup()
 
+    // Note: userEvent uses act automatically
     await user.click(screen.getByText('Load'))
 
     const initialVoteText = await screen.findByText(/has 0/)
