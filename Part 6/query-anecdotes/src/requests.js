@@ -8,7 +8,13 @@ export const createAnecdote = (newAnecdote) =>
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(newAnecdote)
-  }).then(res => res.json())
+  }).then(async res => {
+    if (!res.ok) {
+      const errorData = await res.json()
+      throw new Error(errorData.error) 
+    }
+    return res.json()
+  })
 
 export const updateAnecdote = (updatedFields) =>
   fetch(`${baseUrl}/${updatedFields.id}`, {
