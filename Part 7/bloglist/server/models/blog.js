@@ -1,0 +1,37 @@
+const mongoose = require('mongoose')
+const config = require('../utils/config')
+const logger = require('../utils/logger')
+
+mongoose.set('strictQuery', false)
+
+logger.info('connecting to', config.MONGODB_URI)
+
+mongoose
+  .connect(config.MONGODB_URI, { family: 4 })
+  .then(() => {
+    logger.info('connected to MongoDB')
+  })
+  .catch((error) => {
+    logger.error('error connection to MongoDB:', error.message)
+  })
+
+const blogSchema = mongoose.Schema({
+  url: String,
+  title: String,
+  author: String,
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User'
+  },
+  likes: Number,
+})
+
+blogSchema.set('toJSON', {
+  transform: (document, returnedObject) => {
+    returnedObject.id = returnedObject._id.toString()
+    delete returnedObject._id
+    delete returnedObject.__v
+  }
+})
+
+module.exports = mongoose.model('Blog', blogSchema)
