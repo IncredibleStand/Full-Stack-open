@@ -1,4 +1,5 @@
-node_modules
+# Ignore node_modules in all subfolders
+**/node_modules/
 
 # Ignore dist/build output in all subfolders
 **/dist-ssr/
