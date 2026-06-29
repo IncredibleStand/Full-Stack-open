@@ -12,7 +12,8 @@ import NotFound from './components/NotFound'
 
 // --- STYLED COMPONENTS FOR LAYOUT & LOGIN ---
 const PageContainer = styled.div`
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   max-width: 1200px;
   margin: 0 auto;
   padding: 0 20px;
@@ -25,7 +26,7 @@ const NavBar = styled.nav`
   align-items: center;
   justify-content: space-between;
   border-radius: 0 0 8px 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   margin-bottom: 32px;
 `
 
@@ -64,7 +65,7 @@ const UserSection = styled.span`
 
 const LogoutButton = styled.button`
   background: transparent;
-  border: 1px solid rgba(255,255,255,0.6);
+  border: 1px solid rgba(255, 255, 255, 0.6);
   color: white;
   padding: 6px 12px;
   font-size: 13px;
@@ -96,7 +97,7 @@ const BlogList = styled.ul`
 
 const BlogListItem = styled.li`
   margin-bottom: 12px;
-  
+
   a {
     display: block;
     padding: 16px;
@@ -123,7 +124,7 @@ const LoginFormWrapper = styled.div`
   padding: 32px;
   background: white;
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   border: 1px solid #e5e7eb;
 
   input {
@@ -154,7 +155,7 @@ const FormButton = styled.button`
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
   &:hover {
     background-color: #1557b0;
@@ -166,24 +167,27 @@ const App = () => {
   const [blogs, setBlogs] = useState([])
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [notification, setNotification] = useState({ message: null, type: null })
-  
+  const [notification, setNotification] = useState({
+    message: null,
+    type: null,
+  })
+
   const navigate = useNavigate()
 
   useEffect(() => {
-    blogService.getAll().then(blogs => setBlogs(blogs))  
+    blogService.getAll().then((blogs) => setBlogs(blogs))
   }, [])
 
-const [user, setUser] = useState(() => {
-  const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
-  if (loggedUserJSON) {
-    const userObject = JSON.parse(loggedUserJSON)
-    // Synchronously configure your token configuration during initialization
-    blogService.setToken(userObject.token)
-    return userObject
-  }
-  return null
-})
+  const [user, setUser] = useState(() => {
+    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
+    if (loggedUserJSON) {
+      const userObject = JSON.parse(loggedUserJSON)
+      // Synchronously configure your token configuration during initialization
+      blogService.setToken(userObject.token)
+      return userObject
+    }
+    return null
+  })
   const notify = (message, type = 'success') => {
     setNotification({ message, type })
     setTimeout(() => setNotification({ message: null, type: null }), 5000)
@@ -193,7 +197,7 @@ const [user, setUser] = useState(() => {
     event.preventDefault()
     try {
       const user = await loginService.login({ username, password })
-      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user)) 
+      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
       blogService.setToken(user.token)
       setUser(user)
       setUsername('')
@@ -216,7 +220,10 @@ const [user, setUser] = useState(() => {
       const returnedBlog = await blogService.create(blogObject)
       setBlogs(blogs.concat(returnedBlog))
       navigate('/')
-      notify(`a new blog ${returnedBlog.title} by ${returnedBlog.author} added`, 'success')
+      notify(
+        `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
+        'success'
+      )
     } catch {
       notify('Failed to add blog', 'error')
     }
@@ -225,18 +232,22 @@ const [user, setUser] = useState(() => {
   const addLike = async (id, blogObject) => {
     try {
       const updatedBlog = await blogService.update(id, blogObject)
-      setBlogs(blogs.map(blog => blog.id !== id ? blog : updatedBlog))
+      setBlogs(blogs.map((blog) => (blog.id !== id ? blog : updatedBlog)))
     } catch {
       notify('Error updating likes', 'error')
     }
   }
 
   const removeBlog = async (id) => {
-    const blogToDelete = blogs.find(b => b.id === id)
-    if (window.confirm(`Remove blog ${blogToDelete.title} by ${blogToDelete.author}?`)) {
+    const blogToDelete = blogs.find((b) => b.id === id)
+    if (
+      window.confirm(
+        `Remove blog ${blogToDelete.title} by ${blogToDelete.author}?`
+      )
+    ) {
       try {
         await blogService.remove(id)
-        setBlogs(blogs.filter(blog => blog.id !== id))
+        setBlogs(blogs.filter((blog) => blog.id !== id))
         notify('Blog removed successfully', 'success')
       } catch {
         notify('Failed to delete blog', 'error')
@@ -251,10 +262,14 @@ const [user, setUser] = useState(() => {
         <NavLinks>
           <StyledNavLink to="/">blogs</StyledNavLink>
           {user && <StyledNavLink to="/create">new blog</StyledNavLink>}
-          {user 
-            ? <UserSection>{user.name} logged in <LogoutButton onClick={handleLogout}>logout</LogoutButton></UserSection>
-            : <StyledNavLink to="/login">login</StyledNavLink>
-          }
+          {user ? (
+            <UserSection>
+              {user.name} logged in{' '}
+              <LogoutButton onClick={handleLogout}>logout</LogoutButton>
+            </UserSection>
+          ) : (
+            <StyledNavLink to="/login">login</StyledNavLink>
+          )}
         </NavLinks>
       </NavBar>
 
@@ -269,48 +284,79 @@ const [user, setUser] = useState(() => {
         }}
       >
         <Routes>
-          <Route path="/" element={
-            <div>
-              <ContentHeader>blogs</ContentHeader>
-              <BlogList>
-                {[...blogs].sort((a, b) => b.likes - a.likes).map(blog =>
-                  <BlogListItem key={blog.id}>
-                    <Link to={`/blogs/${blog.id}`}>
-                      {blog.title} by {blog.author}
-                    </Link>
-                  </BlogListItem>
-                )}
-              </BlogList>
-            </div>
-          } />
+          <Route
+            path="/"
+            element={
+              <div>
+                <ContentHeader>blogs</ContentHeader>
+                <BlogList>
+                  {[...blogs]
+                    .sort((a, b) => b.likes - a.likes)
+                    .map((blog) => (
+                      <BlogListItem key={blog.id}>
+                        <Link to={`/blogs/${blog.id}`}>
+                          {blog.title} by {blog.author}
+                        </Link>
+                      </BlogListItem>
+                    ))}
+                </BlogList>
+              </div>
+            }
+          />
 
-          <Route path="/create" element={
-            user ? <BlogForm createBlog={addBlog} /> : <Navigate replace to="/login" />
-          } />
+          <Route
+            path="/create"
+            element={
+              user ? (
+                <BlogForm createBlog={addBlog} />
+              ) : (
+                <Navigate replace to="/login" />
+              )
+            }
+          />
 
-          <Route path="/blogs/:id" element={
-            <BlogView blogs={blogs} addLike={addLike} removeBlog={removeBlog} user={user} />
-          } />
-          
-          <Route path="/login" element={
-            <LoginFormWrapper>
-              <ContentHeader style={{ textAlign: 'center', fontSize: '26px' }}>Log in to application</ContentHeader>
-              <form onSubmit={handleLogin}>
-                <input 
-                  type="text" value={username} placeholder="username"
-                  onChange={({ target }) => setUsername(target.value)} 
-                />
-                <input 
-                  type="password" value={password} placeholder="password"
-                  onChange={({ target }) => setPassword(target.value)} 
-                />
-                <FormButton type="submit">login</FormButton>
-              </form>
-            </LoginFormWrapper>
-          } />
+          <Route
+            path="/blogs/:id"
+            element={
+              <BlogView
+                blogs={blogs}
+                addLike={addLike}
+                removeBlog={removeBlog}
+                user={user}
+              />
+            }
+          />
 
-        {/* The splat route must be at the bottom to catch all undefined paths */}
-        <Route path="*" element={<NotFound />} />
+          <Route
+            path="/login"
+            element={
+              <LoginFormWrapper>
+                <ContentHeader
+                  style={{ textAlign: 'center', fontSize: '26px' }}
+                >
+                  Log in to application
+                </ContentHeader>
+                <form onSubmit={handleLogin}>
+                  <input
+                    type="text"
+                    value={username}
+                    placeholder="username"
+                    onChange={({ target }) => setUsername(target.value)}
+                  />
+                  <input
+                    type="password"
+                    value={password}
+                    placeholder="password"
+                    onChange={({ target }) => setPassword(target.value)}
+                  />
+                  <FormButton type="submit">login</FormButton>
+                </form>
+              </LoginFormWrapper>
+            }
+          />
+
+          {/* The splat route must be at the bottom to catch all undefined paths */}
+          <Route path="*" element={<NotFound />} />
         </Routes>
       </ErrorBoundary>
     </PageContainer>

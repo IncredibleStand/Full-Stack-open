@@ -15,7 +15,7 @@ const FormTitle = styled.h2`
 
 const InputGroup = styled.div`
   margin-bottom: 16px;
-  
+
   input {
     width: 100%;
     padding: 12px;
@@ -29,7 +29,7 @@ const InputGroup = styled.div`
     &:focus {
       border-color: #1a73e8;
     }
-    
+
     &::placeholder {
       color: #9ca3af;
     }
@@ -47,7 +47,7 @@ const Button = styled.button`
   cursor: pointer;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   transition: background-color 0.2s;
 
   &:hover {
@@ -73,24 +73,30 @@ const BlogForm = ({ createBlog }) => {
       <FormTitle>create new</FormTitle>
       <form onSubmit={addBlog}>
         <InputGroup>
-          <input 
-            type="text" value={title} name="Title" 
+          <input
+            type="text"
+            value={title}
+            name="Title"
             onChange={({ target }) => setTitle(target.value)}
             placeholder="title"
           />
         </InputGroup>
         <InputGroup>
-          <input 
-            type="text" value={author} name="Author" 
+          <input
+            type="text"
+            value={author}
+            name="Author"
             onChange={({ target }) => setAuthor(target.value)}
-            placeholder="author" 
+            placeholder="author"
           />
         </InputGroup>
         <InputGroup>
-          <input 
-            type="text" value={url} name="Url" 
+          <input
+            type="text"
+            value={url}
+            name="Url"
             onChange={({ target }) => setUrl(target.value)}
-            placeholder="url" 
+            placeholder="url"
           />
         </InputGroup>
         <Button type="submit">create</Button>

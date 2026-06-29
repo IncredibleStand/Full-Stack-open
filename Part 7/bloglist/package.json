@@ -8,7 +8,8 @@
     "start": "NODE_ENV=production pnpm --dir server start"
   },
   "devDependencies": {
-    "concurrently": "^8.2.2"
+    "concurrently": "^8.2.2",
+    "prettier": "^3.9.3"
   },
   "dependencies": {
     "react-error-boundary": "^6.1.2"

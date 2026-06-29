@@ -8,7 +8,9 @@ const ErrorContainer = styled.div`
   margin-top: 32px;
   margin-bottom: 32px;
   text-align: center;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 `
 
 const ErrorTitle = styled.h2`
@@ -49,9 +51,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }) => {
       <ErrorText>
         {error.message || 'An unexpected rendering error occurred.'}
       </ErrorText>
-      <ReloadButton onClick={resetErrorBoundary}>
-        Try Again
-      </ReloadButton>
+      <ReloadButton onClick={resetErrorBoundary}>Try Again</ReloadButton>
     </ErrorContainer>
   )
 }

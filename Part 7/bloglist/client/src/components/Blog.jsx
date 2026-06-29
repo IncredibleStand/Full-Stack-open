@@ -9,7 +9,7 @@ const Blog = ({ blog, addLike, removeBlog, currentUser }) => {
     const updatedBlog = {
       ...blog,
       likes: blog.likes + 1,
-      user: blog.user?.id || blog.user
+      user: blog.user?.id || blog.user,
     }
     addLike(blog.id, updatedBlog)
   }
@@ -25,13 +25,13 @@ const Blog = ({ blog, addLike, removeBlog, currentUser }) => {
     paddingLeft: 2,
     border: 'solid',
     borderWidth: 1,
-    marginBottom: 5
+    marginBottom: 5,
   }
 
   return (
     <div style={blogStyle} className="blog">
       <div>
-        {blog.title} {blog.author} 
+        {blog.title} {blog.author}
         <button onClick={toggleVisibility}>{visible ? 'hide' : 'view'}</button>
       </div>
 
@@ -43,7 +43,16 @@ const Blog = ({ blog, addLike, removeBlog, currentUser }) => {
           </div>
           <div>{blog.user?.name}</div>
           {showRemoveButton && (
-            <button onClick={handleDelete} style={{ backgroundColor: 'lightblue', color: 'black', border: 'none', padding: '5px', borderRadius: '3px' }}>
+            <button
+              onClick={handleDelete}
+              style={{
+                backgroundColor: 'lightblue',
+                color: 'black',
+                border: 'none',
+                padding: '5px',
+                borderRadius: '3px',
+              }}
+            >
               remove
             </button>
           )}

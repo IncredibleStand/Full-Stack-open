@@ -9,7 +9,9 @@ const NotFoundContainer = styled.div`
   margin-top: 32px;
   margin-bottom: 32px;
   text-align: center;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 `
 
 const NotFoundTitle = styled.h2`
@@ -44,9 +46,7 @@ const HomeLink = styled(Link)`
 `
 
 const NotFound = () => {
-  return (
-    <NotFoundTitle>404 - Page not found</NotFoundTitle>
-  )
+  return <NotFoundTitle>404 - Page not found</NotFoundTitle>
 }
 
 export default NotFound

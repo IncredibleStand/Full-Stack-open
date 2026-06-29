@@ -6,7 +6,7 @@ const Card = styled.div`
   background: white;
   padding: 32px;
   border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   border: 1px solid #e5e7eb;
   max-width: 650px;
   margin-top: 24px;
@@ -59,8 +59,8 @@ const LikesCounter = styled.span`
 
 const ActionButton = styled.button`
   background: white;
-  border: 1px solid ${props => props.$danger ? '#ff8a8a' : '#3b82f6'};
-  color: ${props => props.$danger ? '#ef4444' : '#1a73e8'};
+  border: 1px solid ${(props) => (props.$danger ? '#ff8a8a' : '#3b82f6')};
+  color: ${(props) => (props.$danger ? '#ef4444' : '#1a73e8')};
   padding: 8px 20px;
   font-size: 14px;
   font-weight: 500;
@@ -71,16 +71,15 @@ const ActionButton = styled.button`
   transition: all 0.2s;
 
   &:hover {
-    background: ${props => props.$danger ? '#fef2f2' : '#f0f7ff'};
-    border-color: ${props => props.$danger ? '#ef4444' : '#1a73e8'};
+    background: ${(props) => (props.$danger ? '#fef2f2' : '#f0f7ff')};
+    border-color: ${(props) => (props.$danger ? '#ef4444' : '#1a73e8')};
   }
 `
 
 const BlogView = ({ blogs, addLike, removeBlog, user }) => {
-  
   const id = useParams().id
   const navigate = useNavigate()
-  const blog = blogs.find(b => b.id === id)
+  const blog = blogs.find((b) => b.id === id)
 
   if (!blog) return null
 
@@ -89,7 +88,7 @@ const BlogView = ({ blogs, addLike, removeBlog, user }) => {
     const updatedBlog = {
       ...blog,
       likes: blog.likes + 1,
-      user: blog.user?.id || blog.user
+      user: blog.user?.id || blog.user,
     }
     addLike(blog.id, updatedBlog)
   }
@@ -108,11 +107,17 @@ const BlogView = ({ blogs, addLike, removeBlog, user }) => {
           {blog.url}
         </LinkAnchor>
       </div>
-      
+
       <ButtonGroup>
-        <LikesCounter><strong>{blog.likes}</strong> likes</LikesCounter>
+        <LikesCounter>
+          <strong>{blog.likes}</strong> likes
+        </LikesCounter>
         {user && <ActionButton onClick={handleLike}>like</ActionButton>}
-        {user &&<ActionButton $danger onClick={handleDelete}>remove</ActionButton>}
+        {user && (
+          <ActionButton $danger onClick={handleDelete}>
+            remove
+          </ActionButton>
+        )}
       </ButtonGroup>
 
       <MetaInfo>Added by {blog.user?.name || 'Anonymous'}</MetaInfo>

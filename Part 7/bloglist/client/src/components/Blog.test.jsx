@@ -9,14 +9,17 @@ describe('<Blog />', () => {
     url: 'http://testurl.com',
     likes: 42,
     user: {
-      name: 'Super User'
-    }
+      name: 'Super User',
+    },
   }
 
   test('renders title and author, but does not render URL or likes by default', () => {
     render(<Blog blog={blog} />)
 
-    const titleAndAuthor = screen.getByText('Testing React components is fun Test Author', { exact: false })
+    const titleAndAuthor = screen.getByText(
+      'Testing React components is fun Test Author',
+      { exact: false }
+    )
     expect(titleAndAuthor).toBeDefined()
 
     const url = screen.queryByText('http://testurl.com')
@@ -26,12 +29,11 @@ describe('<Blog />', () => {
     expect(likes).toBeNull()
   })
 
-
   test('renders URL and likes when the view button is clicked', async () => {
     render(<Blog blog={blog} />)
 
     const user = userEvent.setup()
-    
+
     const button = screen.getByText('view')
     await user.click(button)
 
@@ -48,7 +50,7 @@ describe('<Blog />', () => {
       author: 'Test Author',
       url: 'http://testurl.com',
       likes: 42,
-      user: { name: 'Super User' }
+      user: { name: 'Super User' },
     }
 
     const mockHandler = vi.fn()
