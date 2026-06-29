@@ -77,6 +77,7 @@ const ActionButton = styled.button`
 `
 
 const BlogView = ({ blogs, addLike, removeBlog, user }) => {
+  
   const id = useParams().id
   const navigate = useNavigate()
   const blog = blogs.find(b => b.id === id)

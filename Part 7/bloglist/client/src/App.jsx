@@ -6,6 +6,9 @@ import Notification from './components/Notification'
 import BlogForm from './components/BlogForm'
 import blogService from './services/blogs'
 import loginService from './services/login'
+import { ErrorBoundary } from 'react-error-boundary'
+import ErrorFallback from './components/ErrorFallback'
+import NotFound from './components/NotFound'
 
 // --- STYLED COMPONENTS FOR LAYOUT & LOGIN ---
 const PageContainer = styled.div`
@@ -257,47 +260,59 @@ const [user, setUser] = useState(() => {
 
       <Notification message={notification.message} type={notification.type} />
 
-      <Routes>
-        <Route path="/" element={
-          <div>
-            <ContentHeader>blogs</ContentHeader>
-            <BlogList>
-              {[...blogs].sort((a, b) => b.likes - a.likes).map(blog =>
-                <BlogListItem key={blog.id}>
-                  <Link to={`/blogs/${blog.id}`}>
-                    {blog.title} by {blog.author}
-                  </Link>
-                </BlogListItem>
-              )}
-            </BlogList>
-          </div>
-        } />
+      <ErrorBoundary
+        FallbackComponent={ErrorFallback}
+        onReset={() => {
+          // This runs when the "Try Again" button is clicked.
+          // You can reset specific states here, or just force a hard reload:
+          window.location.reload()
+        }}
+      >
+        <Routes>
+          <Route path="/" element={
+            <div>
+              <ContentHeader>blogs</ContentHeader>
+              <BlogList>
+                {[...blogs].sort((a, b) => b.likes - a.likes).map(blog =>
+                  <BlogListItem key={blog.id}>
+                    <Link to={`/blogs/${blog.id}`}>
+                      {blog.title} by {blog.author}
+                    </Link>
+                  </BlogListItem>
+                )}
+              </BlogList>
+            </div>
+          } />
 
-        <Route path="/create" element={
-          user ? <BlogForm createBlog={addBlog} /> : <Navigate replace to="/login" />
-        } />
+          <Route path="/create" element={
+            user ? <BlogForm createBlog={addBlog} /> : <Navigate replace to="/login" />
+          } />
 
-        <Route path="/blogs/:id" element={
-          <BlogView blogs={blogs} addLike={addLike} removeBlog={removeBlog} user={user} />
-        } />
-        
-        <Route path="/login" element={
-          <LoginFormWrapper>
-            <ContentHeader style={{ textAlign: 'center', fontSize: '26px' }}>Log in to application</ContentHeader>
-            <form onSubmit={handleLogin}>
-              <input 
-                type="text" value={username} placeholder="username"
-                onChange={({ target }) => setUsername(target.value)} 
-              />
-              <input 
-                type="password" value={password} placeholder="password"
-                onChange={({ target }) => setPassword(target.value)} 
-              />
-              <FormButton type="submit">login</FormButton>
-            </form>
-          </LoginFormWrapper>
-        } />
-      </Routes>
+          <Route path="/blogs/:id" element={
+            <BlogView blogs={blogs} addLike={addLike} removeBlog={removeBlog} user={user} />
+          } />
+          
+          <Route path="/login" element={
+            <LoginFormWrapper>
+              <ContentHeader style={{ textAlign: 'center', fontSize: '26px' }}>Log in to application</ContentHeader>
+              <form onSubmit={handleLogin}>
+                <input 
+                  type="text" value={username} placeholder="username"
+                  onChange={({ target }) => setUsername(target.value)} 
+                />
+                <input 
+                  type="password" value={password} placeholder="password"
+                  onChange={({ target }) => setPassword(target.value)} 
+                />
+                <FormButton type="submit">login</FormButton>
+              </form>
+            </LoginFormWrapper>
+          } />
+
+        {/* The splat route must be at the bottom to catch all undefined paths */}
+        <Route path="*" element={<NotFound />} />
+        </Routes>
+      </ErrorBoundary>
     </PageContainer>
   )
 }
