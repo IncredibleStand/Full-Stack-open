@@ -1,14 +1,22 @@
 import { useState, useEffect } from 'react'
 import { Routes, Route, Link, useNavigate, Navigate } from 'react-router-dom'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import styled from 'styled-components'
+
+// Components
 import BlogView from './components/BlogView'
 import Notification from './components/Notification'
 import BlogForm from './components/BlogForm'
-import blogService from './services/blogs'
-import loginService from './services/login'
 import { ErrorBoundary } from 'react-error-boundary'
 import ErrorFallback from './components/ErrorFallback'
 import NotFound from './components/NotFound'
+
+// Services
+import blogService from './services/blogs'
+
+// Zustand Stores
+import { useNotificationStore } from './store/notificationStore'
+import { useUserStore } from './store/userStore'
 
 // --- STYLED COMPONENTS FOR LAYOUT & LOGIN ---
 const PageContainer = styled.div`
@@ -164,95 +172,104 @@ const FormButton = styled.button`
 
 // --- MAIN COMPONENT ---
 const App = () => {
-  const [blogs, setBlogs] = useState([])
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  // Local Form State
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [notification, setNotification] = useState({
-    message: null,
-    type: null,
-  })
 
-  const navigate = useNavigate()
+  // Zustand State
+  const setNotification = useNotificationStore((state) => state.setNotification)
+  const user = useUserStore((state) => state.user)
+  const initializeUser = useUserStore((state) => state.initializeUser)
+  const login = useUserStore((state) => state.login)
+  const logout = useUserStore((state) => state.logout)
 
   useEffect(() => {
-    blogService.getAll().then((blogs) => setBlogs(blogs))
-  }, [])
+    initializeUser()
+  }, [initializeUser])
 
-  const [user, setUser] = useState(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedBlogappUser')
-    if (loggedUserJSON) {
-      const userObject = JSON.parse(loggedUserJSON)
-      // Synchronously configure your token configuration during initialization
-      blogService.setToken(userObject.token)
-      return userObject
-    }
-    return null
+  // --- REACT QUERY: FETCHING ---
+  const { data: blogs = [], isLoading } = useQuery({
+    queryKey: ['blogs'],
+    queryFn: blogService.getAll,
   })
-  const notify = (message, type = 'success') => {
-    setNotification({ message, type })
-    setTimeout(() => setNotification({ message: null, type: null }), 5000)
-  }
 
+  // --- REACT QUERY: MUTATIONS ---
+  const createBlogMutation = useMutation({
+    mutationFn: blogService.create,
+    onSuccess: (newBlog) => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+      navigate('/')
+      setNotification(
+        `a new blog ${newBlog.title} by ${newBlog.author} added`,
+        'success'
+      )
+    },
+    onError: () => {
+      setNotification('Failed to add blog', 'error')
+    },
+  })
+
+  const updateLikeMutation = useMutation({
+    mutationFn: ({ id, updatedBlog }) => blogService.update(id, updatedBlog),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    },
+    onError: () => {
+      setNotification('Error updating likes', 'error')
+    },
+  })
+
+  const deleteBlogMutation = useMutation({
+    mutationFn: blogService.remove,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+      setNotification('Blog removed successfully', 'success')
+      navigate('/')
+    },
+    onError: () => {
+      setNotification('Failed to delete blog', 'error')
+    },
+  })
+
+  // --- HANDLERS ---
   const handleLogin = async (event) => {
     event.preventDefault()
     try {
-      const user = await loginService.login({ username, password })
-      window.localStorage.setItem('loggedBlogappUser', JSON.stringify(user))
-      blogService.setToken(user.token)
-      setUser(user)
+      await login({ username, password })
       setUsername('')
       setPassword('')
       navigate('/')
     } catch {
-      notify('wrong username or password', 'error')
+      setNotification('wrong username or password', 'error')
     }
   }
 
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedBlogappUser')
-    setUser(null)
-    blogService.setToken(null)
+    logout()
     navigate('/')
   }
 
-  const addBlog = async (blogObject) => {
-    try {
-      const returnedBlog = await blogService.create(blogObject)
-      setBlogs(blogs.concat(returnedBlog))
-      navigate('/')
-      notify(
-        `a new blog ${returnedBlog.title} by ${returnedBlog.author} added`,
-        'success'
-      )
-    } catch {
-      notify('Failed to add blog', 'error')
-    }
-  }
-
-  const addLike = async (id, blogObject) => {
-    try {
-      const updatedBlog = await blogService.update(id, blogObject)
-      setBlogs(blogs.map((blog) => (blog.id !== id ? blog : updatedBlog)))
-    } catch {
-      notify('Error updating likes', 'error')
-    }
-  }
-
-  const removeBlog = async (id) => {
+  const handleRemoveBlog = (id) => {
     const blogToDelete = blogs.find((b) => b.id === id)
     if (
       window.confirm(
         `Remove blog ${blogToDelete.title} by ${blogToDelete.author}?`
       )
     ) {
-      try {
-        await blogService.remove(id)
-        setBlogs(blogs.filter((blog) => blog.id !== id))
-        notify('Blog removed successfully', 'success')
-      } catch {
-        notify('Failed to delete blog', 'error')
-      }
+      deleteBlogMutation.mutate(id)
     }
+  }
+
+  // --- RENDER ---
+  if (isLoading) {
+    return (
+      <PageContainer>
+        <div>Loading data...</div>
+      </PageContainer>
+    )
   }
 
   return (
@@ -273,15 +290,11 @@ const App = () => {
         </NavLinks>
       </NavBar>
 
-      <Notification message={notification.message} type={notification.type} />
+      <Notification />
 
       <ErrorBoundary
         FallbackComponent={ErrorFallback}
-        onReset={() => {
-          // This runs when the "Try Again" button is clicked.
-          // You can reset specific states here, or just force a hard reload:
-          window.location.reload()
-        }}
+        onReset={() => window.location.reload()}
       >
         <Routes>
           <Route
@@ -303,30 +316,33 @@ const App = () => {
               </div>
             }
           />
-
           <Route
             path="/create"
             element={
               user ? (
-                <BlogForm createBlog={addBlog} />
+                <BlogForm
+                  createBlog={(blogObject) =>
+                    createBlogMutation.mutate(blogObject)
+                  }
+                />
               ) : (
                 <Navigate replace to="/login" />
               )
             }
           />
-
           <Route
             path="/blogs/:id"
             element={
               <BlogView
                 blogs={blogs}
-                addLike={addLike}
-                removeBlog={removeBlog}
+                addLike={(id, updatedBlog) =>
+                  updateLikeMutation.mutate({ id, updatedBlog })
+                }
+                removeBlog={handleRemoveBlog}
                 user={user}
               />
             }
           />
-
           <Route
             path="/login"
             element={
@@ -354,8 +370,6 @@ const App = () => {
               </LoginFormWrapper>
             }
           />
-
-          {/* The splat route must be at the bottom to catch all undefined paths */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       </ErrorBoundary>

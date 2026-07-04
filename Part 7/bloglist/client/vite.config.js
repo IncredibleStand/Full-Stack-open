@@ -17,4 +17,9 @@ export default defineConfig({
     globals: true,
     setupFiles: './testSetup.js',
   },
+  resolve: {
+    // Forces Vite to always use the root react/react-dom,
+    // ignoring pnpm's nested symlinks for these packages.
+    dedupe: ['react', 'react-dom'],
+  },
 })

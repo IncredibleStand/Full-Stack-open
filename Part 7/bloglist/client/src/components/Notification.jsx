@@ -1,4 +1,6 @@
+// src/components/Notification.jsx
 import styled from 'styled-components'
+import { useNotificationStore } from '../store/notificationStore'
 
 const NotificationContainer = styled.div`
   background: ${(props) => (props.$type === 'error' ? '#fde8e8' : '#eafaf1')};
@@ -11,17 +13,22 @@ const NotificationContainer = styled.div`
   margin-bottom: 20px;
   display: flex;
   align-items: center;
-  gap: 8px;
   font-weight: 500;
+  span {
+    margin-right: 8px;
+  }
 `
 
-const Notification = ({ message, type }) => {
-  if (!message) return null
+const Notification = () => {
+  // Access the store directly
+  const notification = useNotificationStore((state) => state.notification)
+
+  if (!notification || !notification.message) return null
 
   return (
-    <NotificationContainer $type={type}>
-      {type === 'success' ? '✓ ' : '⚠ '}
-      {message}
+    <NotificationContainer $type={notification.type}>
+      <span>{notification.type === 'success' ? '✓' : '⚠'}</span>
+      {notification.message}
     </NotificationContainer>
   )
 }
