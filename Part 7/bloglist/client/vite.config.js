@@ -22,4 +22,4 @@ export default defineConfig({
     // ignoring pnpm's nested symlinks for these packages.
     dedupe: ['react', 'react-dom'],
   },
-})
+});

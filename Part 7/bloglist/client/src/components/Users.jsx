@@ -3,45 +3,86 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import userService from '../services/users'
 
-// --- STYLED COMPONENTS ---
+// --- REFINED STYLED COMPONENTS ---
+const PageContainer = styled.div`
+  max-width: 800px;
+  margin: 0 auto;
+  padding-top: 20px;
+`
+
 const PageTitle = styled.h2`
   font-size: 32px;
-  font-weight: bold;
+  font-weight: 800;
   color: #111827;
-  margin-bottom: 24px;
+  margin-bottom: 32px;
+  letter-spacing: -0.5px;
+`
+
+const TableWrapper = styled.div`
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
 `
 
 const Table = styled.table`
   width: 100%;
   border-collapse: collapse;
-  background: white;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  overflow: hidden;
+  text-align: left;
 `
 
 const Th = styled.th`
-  text-align: left;
-  padding: 16px;
-  background-color: #f9fafb;
-  border-bottom: 2px solid #e5e7eb;
-  color: #374151;
-  font-weight: bold;
+  padding: 18px 24px;
+  background-color: #f8fafc;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 2px solid #e2e8f0;
+`
+
+const Tr = styled.tr`
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #f1f5f9;
+  }
+
+  &:last-child td {
+    border-bottom: none;
+  }
 `
 
 const Td = styled.td`
-  padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-  color: #4b5563;
+  padding: 16px 24px;
+  border-bottom: 1px solid #e2e8f0;
+  color: #334155;
+  font-size: 15px;
 
   a {
-    color: #1a73e8;
+    color: #2563eb;
     text-decoration: none;
-    font-weight: 500;
+    font-weight: 600;
+    transition: color 0.2s ease;
+
     &:hover {
+      color: #1d4ed8;
       text-decoration: underline;
     }
   }
+`
+
+const Badge = styled.span`
+  background-color: #eff6ff;
+  color: #1d4ed8;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 13px;
+  font-weight: 700;
 `
 
 const Users = () => {
@@ -51,35 +92,43 @@ const Users = () => {
   })
 
   if (isLoading) {
-    return <div>Loading users...</div>
+    return (
+      <PageContainer>
+        <div>Loading users...</div>
+      </PageContainer>
+    )
   }
 
   return (
-    <div>
-      <PageTitle>Users</PageTitle>
-      <Table>
-        <thead>
-          <tr>
-            <Th>Name</Th>
-            <Th>Username</Th>
-            <Th>Blogs created</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map((user) => (
-            <tr key={user.id}>
-              <Td>
-                <Link to={`/users/${user.id}`}>
-                  {user.name || user.username}
-                </Link>
-              </Td>
-              <Td>{user.username}</Td>
-              <Td>{user.blogs.length}</Td>
+    <PageContainer>
+      <PageTitle>Users Directory</PageTitle>
+      <TableWrapper>
+        <Table>
+          <thead>
+            <tr>
+              <Th>Name</Th>
+              <Th>Username</Th>
+              <Th>Blogs Created</Th>
             </tr>
-          ))}
-        </tbody>
-      </Table>
-    </div>
+          </thead>
+          <tbody>
+            {users.map((user) => (
+              <Tr key={user.id}>
+                <Td>
+                  <Link to={`/users/${user.id}`}>
+                    {user.name || user.username}
+                  </Link>
+                </Td>
+                <Td>{user.username}</Td>
+                <Td>
+                  <Badge>{user.blogs.length}</Badge>
+                </Td>
+              </Tr>
+            ))}
+          </tbody>
+        </Table>
+      </TableWrapper>
+    </PageContainer>
   )
 }
 

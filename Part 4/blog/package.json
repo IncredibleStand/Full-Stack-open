@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cros-env NODE_ENV=production node index.js",
-    "dev": "cross-env NODE_ENV=development node --watch index.js",
+    "start": "node init && cros-env NODE_ENV=production node index.js",
+    "dev": "node init && cross-env NODE_ENV=development node --watch index.js",
     "test": "cross-env NODE_ENV=test node --test tests/blog_api.test.js",
     "lint": "eslint ."
   },
