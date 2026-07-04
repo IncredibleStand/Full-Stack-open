@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import userService from '../services/users'
 
@@ -25,17 +26,25 @@ const Th = styled.th`
   background-color: #f9fafb;
   border-bottom: 2px solid #e5e7eb;
   color: #374151;
-  font-weight: 600;
+  font-weight: bold;
 `
 
 const Td = styled.td`
   padding: 16px;
   border-bottom: 1px solid #e5e7eb;
   color: #4b5563;
+
+  a {
+    color: #1a73e8;
+    text-decoration: none;
+    font-weight: 500;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
 `
 
 const Users = () => {
-  // Fetch users using React Query
   const { data: users = [], isLoading } = useQuery({
     queryKey: ['users'],
     queryFn: userService.getAll,
@@ -59,7 +68,11 @@ const Users = () => {
         <tbody>
           {users.map((user) => (
             <tr key={user.id}>
-              <Td>{user.name || user.username}</Td>
+              <Td>
+                <Link to={`/users/${user.id}`}>
+                  {user.name || user.username}
+                </Link>
+              </Td>
               <Td>{user.username}</Td>
               <Td>{user.blogs.length}</Td>
             </tr>

@@ -10,6 +10,8 @@ import BlogForm from './components/BlogForm'
 import { ErrorBoundary } from 'react-error-boundary'
 import ErrorFallback from './components/ErrorFallback'
 import NotFound from './components/NotFound'
+import Users from './components/Users'
+import User from './components/User'
 
 // Services
 import blogService from './services/blogs'
@@ -234,6 +236,16 @@ const App = () => {
     },
   })
 
+  const addCommentMutation = useMutation({
+    mutationFn: ({ id, comment }) => blogService.addComment(id, comment),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['blogs'] })
+    },
+    onError: () => {
+      setNotification('Failed to add comment', 'error')
+    },
+  })
+
   // --- HANDLERS ---
   const handleLogin = async (event) => {
     event.preventDefault()
@@ -278,6 +290,7 @@ const App = () => {
         <NavBrand>Blog App</NavBrand>
         <NavLinks>
           <StyledNavLink to="/">blogs</StyledNavLink>
+          <StyledNavLink to="/users">users</StyledNavLink>
           {user && <StyledNavLink to="/create">new blog</StyledNavLink>}
           {user ? (
             <UserSection>
@@ -316,6 +329,8 @@ const App = () => {
               </div>
             }
           />
+          <Route path="/users" element={<Users />} />
+          <Route path="/users/:id" element={<User />} />
           <Route
             path="/create"
             element={
@@ -339,6 +354,9 @@ const App = () => {
                   updateLikeMutation.mutate({ id, updatedBlog })
                 }
                 removeBlog={handleRemoveBlog}
+                addComment={(id, comment) =>
+                  addCommentMutation.mutate({ id, comment })
+                }
                 user={user}
               />
             }

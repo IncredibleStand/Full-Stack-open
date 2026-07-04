@@ -3,8 +3,7 @@ const Blog = require('../models/blog')
 const middleware = require('../utils/middleware')
 
 blogsRouter.get('/', async (request, response) => {
-  const blogs = await Blog
-    .find({}).populate('user', { username: 1, name: 1 })
+  const blogs = await Blog.find({}).populate('user', { username: 1, name: 1 })
 
   response.json(blogs)
 })
@@ -35,7 +34,7 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
     author: body.author,
     url: body.url,
     likes: body.likes ?? 0,
-    user: user._id
+    user: user._id,
   })
 
   const savedBlog = await blog.save()
@@ -46,6 +45,22 @@ blogsRouter.post('/', middleware.userExtractor, async (request, response) => {
   await user.save()
 
   response.status(201).json(savedBlog)
+})
+
+blogsRouter.post('/:id/comments', async (request, response) => {
+  const { comment } = request.body
+  const blog = await Blog.findById(request.params.id)
+
+  if (!blog) {
+    return response.status(404).json({ error: 'blog not found' })
+  }
+
+  // Add the new comment to the array
+  blog.comments = blog.comments.concat(comment)
+  const updatedBlog = await blog.save()
+
+  // Return the fully updated blog
+  response.status(201).json(updatedBlog)
 })
 
 blogsRouter.delete('/:id', middleware.userExtractor, async (request, response) => {
@@ -70,14 +85,13 @@ blogsRouter.put('/:id', async (request, response) => {
     title,
     author,
     url,
-    likes
+    likes,
   }
 
-  const updatedBlog = await Blog.findByIdAndUpdate(
-    request.params.id,
-    blogData,
-    { new: true }
-  ).populate('user', { username: 1, name: 1 })
+  const updatedBlog = await Blog.findByIdAndUpdate(request.params.id, blogData, { new: true }).populate('user', {
+    username: 1,
+    name: 1,
+  })
 
   if (!updatedBlog) {
     return response.status(404).end()
